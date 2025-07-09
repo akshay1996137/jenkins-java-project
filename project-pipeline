@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('checkout') {
+            steps {
+                git branch: '$branch', url: 'https://github.com/akshay1996137/jenkins-java-project.git'
+            }
+        }
+        stage('build') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+        stage('test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('artifact') {
+            steps {
+                sh 'mvn package'
+            }
+        }
+         stage('DEPLOY-TO-NEXUS') {
+            steps {
+                nexusArtifactUploader artifacts: [[artifactId: 'NETFLIX', classifier: '', file: 'target/NETFLIX-1.2.2.war', type: '.war']], credentialsId: 'NEXUS_ID', groupId: 'in.RAHAM', nexusUrl: '54.208.49.83:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'new-rp', version: '1.2.2'
+            }
+        }
+        stage('DEPLOY-TO-TOMCAT') {
+            steps {
+                deploy adapters: [
+                    tomcat9(
+credentialsId: '0e0d782b-38c7-4f10-b630-092f9d79a787', path:'', url:'http://54.208.49.83:8080/') 
+                ],
+                contextPath: 'MYAPP' ,
+                war: 'target/*.war'
+            }
+        }
+    }
+}
