@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('checkout') {
+            steps {
+                git branch: '$branch', url: 'https://github.com/akshay1996137/jenkins-java-project.git'
+            }
+        }
+        stage('build') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+        stage('test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('artifact') {
+            steps {
+                sh 'mvn package'
+            }
+        }
+         stage('DEPLOY-TO-S3') {
+            steps {
+                s3Upload consoleLogLevel: 'INFO', dontSetBuildResultOnFailure: false, dontWaitForConcurrentBuildCompletion: false, entries: [[bucket: 'kat1010', excludedFile: '', flatten: false, gzipFiles: false, keepForever: false, managedArtifacts: false, noUploadOnFailure: false, selectedRegion: 'us-east-1', showDirectlyInBrowser: false, sourceFile: 'target/NETFLIX-1.2.2.war', storageClass: 'STANDARD', uploadFromSlave: false, useServerSideEncryption: false]], pluginFailureResultConstraint: 'FAILURE', profileName: 'Akshay', userMetadata: []
+            }
+        }
+        stage('DEPLOY-TO-TOMCAT') {
+            steps {
+                deploy adapters: [
+                    tomcat9(
+credentialsId: '0e0d782b-38c7-4f10-b630-092f9d79a787', path:'', url:'http://54.208.49.83:8080/') 
+                ],
+                contextPath: 'MYAPP' ,
+                war: 'target/*.war'
+            }
+        }
+    }
+}
