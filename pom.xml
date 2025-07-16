@@ -12,7 +12,7 @@
 	<properties>
 		<docker.image.prefix>kammana</docker.image.prefix>
                 <maven.compiler.source>11</maven.compiler.source>
-	</properties>	
+	  </properties>	
 	
 	<dependencies>
 		<dependency>
